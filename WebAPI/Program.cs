@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using WebAPI.Authorization;
 using WebAPI.Data;
 using WebAPI.Models;
 
@@ -44,6 +46,14 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(key)
     };
 });
+
+// Configure Authorization Policies
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("SameOwnerPolicy", policy =>
+        policy.Requirements.Add(new SameOwnerRequirement()));
+
+builder.Services.AddScoped<IAuthorizationHandler, SameOwnerAuthorizationHandler>();
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
